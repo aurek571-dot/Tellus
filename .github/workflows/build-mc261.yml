@@ -40,6 +40,13 @@ jobs:
             echo "::endgroup::"
           done
           echo "::group::interesting classes"; cat diag/interesting-classes.txt; echo "::endgroup::"
+      - name: Static mixin check against 26.1.2 classes
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p diag
+          CP=$(tr '\n' ':' < diag/mcjars.txt)
+          python3 tools/check_mixins.py "$CP" src/main/java src/client/java shared/post-1201/src/main/java shared/mc262/src/main/java shared/mc262/src/client/java shared/mc26/src/main/java shared/mc261/src/main/java shared/mc261/src/client/java shared/fabric/src/main/java shared/fabric/src/client/java mc262/src/main/java mc262/src/client/java mc261/src/client/java 2>&1 | tee diag/mixin-check.txt
       - name: Smoke test dedicated server (mixin check)
         if: steps.build.outcome == 'success'
         continue-on-error: true

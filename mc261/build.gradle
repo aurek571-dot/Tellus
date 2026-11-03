@@ -23,6 +23,7 @@ ext.tellus = [
 		'com/yucareux/tellus/client/screen/EarthTeleportScreen.java',
 		'com/yucareux/tellus/client/screen/TerrainPreviewScreen.java',
 		'com/yucareux/tellus/client/preview/PreviewRenderCompat.java',
+		'com/yucareux/tellus/mixin/client/MinecraftScreenMixin.java',
 	],
 	overriddenInheritedClientSources: [
 		'com/yucareux/tellus/TellusClient.java',
