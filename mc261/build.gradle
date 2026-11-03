@@ -22,10 +22,12 @@ ext.tellus = [
 		'com/yucareux/tellus/client/screen/EarthSpawnpointScreen.java',
 		'com/yucareux/tellus/client/screen/EarthTeleportScreen.java',
 		'com/yucareux/tellus/client/screen/TerrainPreviewScreen.java',
+		'com/yucareux/tellus/client/preview/PreviewRenderCompat.java',
 	],
 	overriddenInheritedClientSources: [
 		'com/yucareux/tellus/TellusClient.java',
 		'com/yucareux/tellus/client/screen/TerrainPreloadScreen.java',
+		'com/yucareux/tellus/mixin/client/SectionOcclusionGraphMixin.java',
 	],
 	overriddenInheritedMainResources: ['fabric.mod.json'],
 	mapboxVersion: '24.1.1',
