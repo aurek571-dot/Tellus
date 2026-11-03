@@ -2,6 +2,8 @@ name: Build Minecraft 26.1.2 (mc261)
 
 on:
   workflow_dispatch:
+  push:
+    branches: [mc261-backport-scaffold]
 
 jobs:
   build:
