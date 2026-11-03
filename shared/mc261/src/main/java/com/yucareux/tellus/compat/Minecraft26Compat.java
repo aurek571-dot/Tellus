@@ -59,11 +59,11 @@ public abstract class Minecraft26Compat {
    }
 
    public static List<String> defaultRandomBiomeIds() {
-      return RandomBiomeCatalog.minecraft26_2OverworldBiomeIds();
+      return RandomBiomeCatalog.minecraft1_21_11OverworldBiomeIds();
    }
 
    public static List<String> normalizeRandomBiomeSelection(List<String> biomeIds) {
-      return RandomBiomeCatalog.normalizeMinecraft26_2Selection(biomeIds);
+      return RandomBiomeCatalog.normalizeMinecraft1_21_11Selection(biomeIds);
    }
 
    public static DimensionType applyHeightLimits(DimensionType base, EarthGeneratorSettings.HeightLimits limits) {
