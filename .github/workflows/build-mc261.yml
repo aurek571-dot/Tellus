@@ -16,9 +16,43 @@ jobs:
           java-version: '25'
       - uses: gradle/actions/setup-gradle@v4
       - name: Build mc261 jar
+        id: build
+        continue-on-error: true
         run: ./gradlew -PtellusTargets=mc261 build -x test --console=plain
+      - name: Dump Minecraft 26.1.2 API signatures (diagnostics)
+        if: always()
+        continue-on-error: true
+        run: |
+          mkdir -p diag
+          find ~/.gradle -name '*.jar' | grep -i -E 'minecraft|mojang' > diag/jars.txt || true
+          MCJARS=""
+          for j in $(cat diag/jars.txt); do
+            if unzip -l "$j" 2>/dev/null | grep -q 'net/minecraft/client/Minecraft.class'; then MCJARS="$MCJARS:$j"; echo "$j" >> diag/mcjars.txt; fi
+          done
+          CP="${MCJARS#:}"
+          echo "Minecraft jars: $CP"
+          for j in $(cat diag/mcjars.txt 2>/dev/null); do unzip -Z1 "$j" | grep '\.class$' | sed 's#/#.#g;s#\.class$##' ; done | sort -u > diag/all-classes.txt
+          wc -l diag/all-classes.txt
+          grep -E 'PrimitiveTopology|BindGroup|RenderPipelines?$|RenderPipeline\$|ColorTargetState|DepthStencilState|VertexFormat|ViewArea|GuiElementRenderState|GuiGraphicsExtractor$' diag/all-classes.txt > diag/interesting-classes.txt || true
+          for c in net.minecraft.client.Minecraft net.minecraft.client.renderer.ViewArea com.mojang.blaze3d.pipeline.RenderPipeline 'com.mojang.blaze3d.pipeline.RenderPipeline$Builder' 'com.mojang.blaze3d.pipeline.RenderPipeline$Snippet' net.minecraft.client.renderer.RenderPipelines com.mojang.blaze3d.pipeline.ColorTargetState com.mojang.blaze3d.pipeline.DepthStencilState com.mojang.blaze3d.pipeline.BlendFunction 'com.mojang.blaze3d.vertex.VertexFormat$Mode' net.minecraft.client.gui.GuiGraphicsExtractor net.minecraft.client.renderer.state.gui.GuiElementRenderState net.minecraft.client.gui.Gui; do
+            echo "::group::javap $c"
+            javap -public -cp "$CP" "$c" 2>&1 | head -400 | tee -a diag/signatures.txt
+            echo "::endgroup::"
+          done
+          echo "::group::interesting classes"; cat diag/interesting-classes.txt; echo "::endgroup::"
+      - name: Upload diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mc261-diagnostics
+          path: diag/
+          if-no-files-found: ignore
       - name: Upload jar
+        if: steps.build.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: Tellus-fabric-26.1.2
           path: mc261/build/libs/*.jar
+      - name: Fail if build failed
+        if: steps.build.outcome == 'failure'
+        run: exit 1
