@@ -46,7 +46,8 @@ jobs:
         run: |
           mkdir -p diag mc261/run
           echo "eula=true" > mc261/run/eula.txt
-          timeout 240 ./gradlew -PtellusTargets=mc261 :mc261:runServer --console=plain > diag/runServer.log 2>&1 < /dev/null || true
+          printf "level-type=tellus:earth\nonline-mode=false\nview-distance=4\nsimulation-distance=4\n" > mc261/run/server.properties
+          timeout 420 ./gradlew -PtellusTargets=mc261 :mc261:runServer --console=plain > diag/runServer.log 2>&1 < /dev/null || true
           grep -n -i -E "mixin|InvalidInjection|Exception|Done \(|Tellus|FATAL|ERROR" diag/runServer.log | head -80 || true
       - name: Upload diagnostics
         if: always()
