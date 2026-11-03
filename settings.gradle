@@ -38,6 +38,7 @@ def availableTellusTargets = [
 	'mc1211-neoforge',
 	'mc12111',
 	'mc12111-neoforge',
+	'mc261',
 	'mc262',
 	'mc262-neoforge',
 	'mc263',
