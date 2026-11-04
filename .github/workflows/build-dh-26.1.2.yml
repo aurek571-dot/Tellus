@@ -1,0 +1,54 @@
+name: Build Distant Horizons 3.3.4-tellus.1 for Minecraft 26.1.2
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [dh-3.3.4-26.1.2]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          # The core/API projects use older toolchains; the last entry is the default JDK (25).
+          java-version: |
+            8
+            17
+            21
+            25
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Build Fabric jar for 26.1.2
+        id: build
+        continue-on-error: true
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon -PmcVer=26.1.2 --max-workers=2 --console=plain :common:clean :fabric:clean :fabric:remapJar
+      - name: Show produced jars and metadata
+        if: always()
+        continue-on-error: true
+        run: |
+          ls -la fabric/build/libs || true
+          for j in fabric/build/libs/DistantHorizons-fabric-*.jar; do
+            echo "== $j"; unzip -p "$j" fabric.mod.json | head -60
+          done
+      - name: Core/API tests
+        if: steps.build.outcome == 'success'
+        continue-on-error: true
+        run: ./gradlew --no-daemon -PmcVer=26.1.2 --max-workers=2 --console=plain :api:test :core:test
+      - name: Upload jar
+        if: steps.build.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: DistantHorizons-fabric-3.3.4-tellus.1-26.1.2
+          path: |
+            fabric/build/libs/DistantHorizons-fabric-*.jar
+            !fabric/build/libs/*-sources.jar
+            !fabric/build/libs/*-dev*.jar
+            !fabric/build/libs/*-all*.jar
+      - name: Fail if build failed
+        if: steps.build.outcome == 'failure'
+        run: exit 1
